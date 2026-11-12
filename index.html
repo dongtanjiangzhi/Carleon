@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d14">
+  <title>陈志远 | 个人主页</title>
+  <script>document.documentElement.classList.replace("no-js", "js");</script>
+  <style>
+    :root {
+      --bg: #080d14;
+      --bg-deep: #05090f;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(142, 207, 223, 0.3);
+      --text: #f5f2ea;
+      --muted: #aab2bc;
+      --faint: #75808d;
+      --accent: #8ecfdf;
+      --warm: #f1b47e;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font-sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: "Songti SC", "SimSun", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* 首屏遮罩 */
+    .entry-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-deep);
+      transition: opacity 1.2s var(--ease), visibility 1.2s;
+      cursor: pointer;
+    }
+    .entry-overlay.hidden { opacity: 0; visibility: hidden; }
+    .entry-text { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.2em; animation: pulse 2s infinite; }
+
+    /* 首屏 */
+    .hero {
+      position: relative; height: 100vh;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: -5%; z-index: -2;
+      background: url("./bg1.jpg") center/cover no-repeat;
+      animation: ken-burns 40s ease-in-out infinite alternate;
+    }
+    .hero-overlay { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(5,9,15,0.5) 0%, rgba(5,9,15,0.85) 100%); }
+    
+    .hero-content {
+      opacity: 0; transform: translateY(20px);
+      transition: all 1.5s var(--ease) 0.5s;
+    }
+    .entry-overlay.hidden ~ .hero .hero-content { opacity: 1; transform: translateY(0); }
+    
+    .hero h1 { font-size: clamp(3rem, 8vw, 6rem); font-weight: 600; letter-spacing: 0.05em; }
+    .hero-subtitle { margin-top: 16px; font-size: 1rem; color: var(--muted); letter-spacing: 0.1em; }
+    
+    .hero-quote { margin-top: 24px; font-family: var(--font-serif); color: #d1d8e0; font-size: 1.1rem; }
+
+    /* MBTI 交互 */
+    .mbti-tag-wrap { display: inline-block; margin-top: 30px; position: relative; }
+    .mbti-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; font-size: 0.75rem;
+      border: 1px solid var(--border); border-radius: 99px;
+      background: rgba(255,255,255,0.05); color: var(--accent);
+      cursor: pointer; transition: all 0.3s;
+    }
+    .mbti-tag:hover { background: rgba(142, 207, 223, 0.15); border-color: var(--accent); }
+    .mbti-tag .ghost { opacity: 0.5; text-decoration: line-through; }
+    
+    .mbti-popup {
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      margin-top: 15px; padding: 12px;
+      background: rgba(15, 20, 28, 0.95); border: 1px solid var(--border);
+      border-radius: var(--radius-md); backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex; gap: 10px; opacity: 0; visibility: hidden;
+      transition: all 0.4s var(--ease); width: 340px; z-index: 10;
+    }
+    .mbti-popup img { width: 50%; border-radius: 8px; cursor: zoom-in; }
+    .mbti-tag-wrap:hover .mbti-popup, .mbti-tag-wrap.active .mbti-popup {
+      opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+    }
+
+    /* 通用区块 */
+    .section { padding: 100px 5vw; max-width: 1100px; margin: 0 auto; }
+    .section-header { margin-bottom: 50px; }
+    .section-header h2 { font-size: 2rem; font-weight: 600; letter-spacing: 0.05em; }
+    .section-header p { color: var(--accent); font-family: monospace; letter-spacing: 0.2em; font-size: 0.8rem; margin-top: 10px; text-transform: uppercase; }
+
+    /* 传统时间线 (高级文档流) */
+    .timeline { position: relative; }
+    .timeline::before {
+      content: ''; position: absolute;
+      top: 0; bottom: 0; left: 120px;
+      width: 1px; background: var(--border);
+    }
+    .timeline-item {
+      position: relative;
+      display: flex; gap: 40px; margin-bottom: 50px;
+    }
+    .timeline-date {
+      width: 100px; text-align: right; flex-shrink: 0;
+      padding-top: 5px; font-family: monospace; color: var(--muted); font-size: 0.85rem;
+    }
+    .timeline-dot {
+      position: absolute; left: 120px; top: 12px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--bg-deep); border: 2px solid var(--accent);
+      transform: translateX(-50%);
+    }
+    .timeline-card {
+      flex: 1;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 30px;
+      transition: transform 0.4s var(--ease), background 0.4s var(--ease);
+    }
+    .timeline-card:hover {
+      transform: translateY(-4px); background: var(--surface-hover); border-color: var(--border-hover);
+    }
+    .timeline-card h3 { font-size: 1.25rem; margin-bottom: 12px; color: var(--warm); }
+    .timeline-card p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; }
+    
+    .cert-img {
+      width: 100%; border-radius: 12px; cursor: zoom-in;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: transform 0.3s;
+    }
+    .cert-img:hover { transform: scale(1.02); }
+    .cert-multi { display: flex; gap: 15px; }
+    .cert-multi .cert-img { width: calc(50% - 7.5px); }
+
+    /* 当下与目标 (网格卡片) */
+    .goals-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;
+    }
+    .goal-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 35px;
+      transition: transform 0.4s var(--ease), background 0.4s var(--ease);
+    }
+    .goal-card:hover {
+      transform: translateY(-5px); background: var(--surface-hover); border-color: var(--border-hover);
+    }
+    .goal-card h3 { font-size: 1.2rem; margin-bottom: 15px; display: flex; justify-content: space-between; }
+    .goal-card h3 span { font-size: 0.75rem; color: var(--accent); background: rgba(142,207,223,0.1); padding: 4px 10px; border-radius: 99px; font-family: monospace; }
+    .goal-card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+    
+    .book-layout { display: flex; flex-direction: column; gap: 15px; }
+    .book-layout img { width: 100%; border-radius: 12px; cursor: zoom-in; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .book-quote { font-family: var(--font-serif); color: var(--text); font-style: italic; font-size: 1.1rem; border-left: 3px solid var(--accent); padding-left: 15px; }
+
+    .future-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 250px; border-style: dashed; }
+    .future-mark { font-size: 3rem; color: var(--border); margin-bottom: 15px; }
+
+    /* 双击放大图片层 */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,0.9);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: all 0.3s;
+      cursor: zoom-out;
+    }
+    .lightbox.active { opacity: 1; visibility: visible; }
+    .lightbox img {
+      max-width: 90vw; max-height: 90vh; object-fit: contain;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s var(--ease);
+    }
+    .lightbox.active img { transform: scale(1); }
+
+    @keyframes ken-burns { 0% { transform: scale(1) translate(0, 0); } 100% { transform: scale(1.1) translate(-2%, 2%); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .timeline::before { left: 20px; }
+      .timeline-item { flex-direction: column; gap: 10px; padding-left: 45px; }
+      .timeline-date { text-align: left; width: auto; padding-top: 0; }
+      .timeline-dot { left: 20px; top: 5px; }
+      .cert-multi { flex-direction: column; }
+      .cert-multi .cert-img { width: 100%; }
+      .goals-grid { grid-template-columns: 1fr; }
+      .mbti-popup { width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 首屏遮罩 -->
+  <div class="entry-overlay" id="entryOverlay">
+    <div class="entry-text">Press Any Key / Click to Enter</div>
+  </div>
+
+  <!-- 首屏 -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>陈志远</h1>
+      <p class="hero-subtitle">南昌航空大学 · 仪器科学与光电工程学院 · 无损检测专业 26级</p>
+      <p class="hero-quote">“那些不是巨人，是风车！”</p>
+      
+      <div class="mbti-tag-wrap" id="mbtiWrap">
+        <div class="mbti-tag">
+          <span class="ghost">INFJ</span> <span>⇢</span> <span>ENTP</span>
+        </div>
+        <div class="mbti-popup">
+          <img src="./mbti-infj.jpg" alt="INFJ">
+          <img src="./mbti-entp.jpg" alt="ENTP">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第二页：历程 -->
+  <section class="section">
+    <div class="section-header">
+      <h2>我的历程</h2>
+      <p>Journey & Experience</p>
+    </div>
+    
+    <div class="timeline">
+      <!-- 节点1 -->
+      <div class="timeline-item">
+        <div class="timeline-date">高中时期<br><span style="font-size: 0.7rem;">BEFORE 2026</span></div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <h3>第二十一届“叶圣陶杯”全国新作文大赛</h3>
+          <p>总决赛二等奖，作品《镜花水月》。文字曾是我观察世界的另一双眼睛。</p>
+          <img src="./cert-writing.jpg" class="cert-img" alt="叶圣陶杯">
+        </div>
+      </div>
+
+      <!-- 节点2 -->
+      <div class="timeline-item">
+        <div class="timeline-date">2026年9月<br><span style="font-size: 0.7rem;">SEP 2026</span></div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <h3>在课堂之外，也开始学会守护</h3>
+          <p>参加江西省红十字会心肺复苏（CPR+AED）培训并通过考核；荣获“2026年江西省大学生国防理论知识线上学习活动”——“赣鄱国防先锋”荣誉称号。</p>
+          <div class="cert-multi">
+            <img src="./cert-defense.jpg" class="cert-img" alt="国防先锋">
+            <img src="./cert-cpr.jpg" class="cert-img" alt="CPR">
+          </div>
+        </div>
+      </div>
+
+      <!-- 节点3 -->
+      <div class="timeline-item">
+        <div class="timeline-date">近期<br><span style="font-size: 0.7rem;">RECENT</span></div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <h3>2026 “外研社·国才杯” 英语能力大赛</h3>
+          <p>在“理解当代中国”全国大学生外语能力大赛校赛中，获得英语组综合能力赛项铜奖。</p>
+          <!-- 注意：请把PDF截图存为 Cert-English综合铜奖.jpg -->
+          <img src="./Cert-English综合铜奖.jpg" class="cert-img" alt="外研社国才杯">
+        </div>
+      </div>
+
+      <!-- 节点4：未来 -->
+      <div class="timeline-item">
+        <div class="timeline-date" style="color: var(--faint);">未来<br><span style="font-size: 0.7rem;">NEXT</span></div>
+        <div class="timeline-dot" style="border-color: var(--faint);"></div>
+        <div class="timeline-card" style="border-style: dashed; background: transparent; cursor: default;">
+          <h3 style="color: var(--faint);">待书写…</h3>
+          <p>留一点空白给尚未发生的惊喜。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第三页：目标 -->
+  <section class="section">
+    <div class="section-header">
+      <h2>当下与目标</h2>
+      <p>Now & Next</p>
+    </div>
+    
+    <div class="goals-grid">
+      <div class="goal-card">
+        <h3>学习与生活 <span>2026 秋季</span></h3>
+        <p>感受大学生活；学习 Godot 引擎，尝试搭建自己的技术底座。保持好奇，保持行动。</p>
+      </div>
+
+      <div class="goal-card">
+        <h3>阅读特写 <span>《罪与罚》</span></h3>
+        <div class="book-layout">
+          <p class="book-quote">“我们一块儿走吧……我们都是被诅咒的人。”</p>
+          <p>阅读是另一种缓慢的远行。那些关于罪、罚与救赎的句子，让日常的边界变得更深一点。</p>
+          <img src="./book-page.jpg" alt="罪与罚">
+        </div>
+      </div>
+
+      <div class="goal-card future-card" style="grid-column: 1 / -1;">
+        <div class="future-mark">?</div>
+        <h3>待解锁目标</h3>
+        <p style="margin-bottom:0;">留给下一个想法、下一次出发。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 放大图片层 -->
+  <div class="lightbox" id="lightbox">
+    <img src="" alt="放大预览" id="lightboxImg">
+  </div>
+
+  <script>
+    // 首屏遮罩
+    const overlay = document.getElementById('entryOverlay');
+    const removeOverlay = () => {
+      overlay.classList.add('hidden');
+      window.removeEventListener('keydown', removeOverlay);
+      window.removeEventListener('click', removeOverlay);
+    };
+    window.addEventListener('keydown', removeOverlay);
+    window.addEventListener('click', removeOverlay);
+
+    // MBTI 手机点击
+    const mbtiWrap = document.getElementById('mbtiWrap');
+    mbtiWrap.addEventListener('click', function(e) {
+      if (e.target.tagName.toLowerCase() !== 'img') this.classList.toggle('active');
+    });
+
+    // 双击放大
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    document.querySelectorAll('img').forEach(img => {
+      img.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+        lightboxImg.src = this.src;
+        lightbox.classList.add('active');
+      });
+    });
+    lightbox.addEventListener('click', function() {
+      this.classList.remove('active');
+      setTimeout(() => { lightboxImg.src = ''; }, 300);
+    });
+  </script>
+</body>
+</html>
